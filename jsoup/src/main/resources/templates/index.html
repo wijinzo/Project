@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google 搜尋</title>
+    <!-- 使用 Thymeleaf 來正確引入靜態資源 -->
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+    <div class="search-container">
+        <h1>Google 搜尋</h1>
+        <form action="/search" method="post">
+            <input type="text" name="keyword" placeholder="輸入關鍵字...">
+            <br>
+            <button type="submit">搜尋</button>
+        </form>
+    </div>
+</body>
+</html>

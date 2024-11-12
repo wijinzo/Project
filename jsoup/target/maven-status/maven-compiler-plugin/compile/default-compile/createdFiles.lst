@@ -1,0 +1,3 @@
+org\jsoup\service\GoogleQuery.class
+org\jsoup\controller\GoogleSearchController.class
+org\jsoup\GoogleOnWebApplication.class
