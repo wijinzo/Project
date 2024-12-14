@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.net.URLDecoder;
+import java.util.regex.*;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -27,7 +29,10 @@ public class GoogleQuery {
 			// Also, consider why the results might be incorrect
 			// when entering Chinese keywords.
 			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
-			this.url = "https://www.google.com/search?q=" + encodeKeyword + "&oe=utf8&num=20";
+			String mainKeyword = "書";
+			String encodeMainKeyword = java.net.URLEncoder.encode(mainKeyword, "utf-8");
+
+			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
 
 			// this.url =
 			// "https://www.google.com/search?q="+searchKeyword+"&oe=utf8&num=20";
@@ -83,11 +88,13 @@ public class GoogleQuery {
 				if (title.equals("")) {
 					continue;
 				}
-				
+
 				System.out.println("Title: " + title + " , url: " + citeUrl);
 
+				String decodedUrl = URLDecoder.decode(citeUrl, "UTF-8");// 原本的url不能訪問，要先解碼
+				String trueUrl = removeQueryParams(decodedUrl);
 				// put title and pair into HashMap
-				retVal.put(title, citeUrl);
+				retVal.put(title, trueUrl);
 
 			} catch (IndexOutOfBoundsException e) {
 //				e.printStackTrace();
@@ -96,4 +103,14 @@ public class GoogleQuery {
 
 		return retVal;
 	}
+
+	public static String removeQueryParams(String url) {
+		int queryStartIndex = url.indexOf('&');
+		if (queryStartIndex == -1) {
+			queryStartIndex = url.indexOf('?');
+		}
+
+		return queryStartIndex != -1 ? url.substring(0, queryStartIndex) : url;
+	}
+
 }
