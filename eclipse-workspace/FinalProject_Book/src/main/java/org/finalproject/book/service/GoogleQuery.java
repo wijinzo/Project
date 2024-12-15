@@ -6,10 +6,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.URLDecoder;
 import java.util.regex.*;
 
+import org.finalproject.book.Keyword.Keyword;
+import org.finalproject.book.web.WebPage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,6 +22,7 @@ public class GoogleQuery {
 	public String searchKeyword;
 	public String url;
 	public String content;
+	public WebPage page;
 
 	public GoogleQuery(String searchKeyword) {
 		this.searchKeyword = searchKeyword;
@@ -29,11 +33,12 @@ public class GoogleQuery {
 			// Also, consider why the results might be incorrect
 			// when entering Chinese keywords.
 			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
-			String mainKeyword = "書";
+			String mainKeyword = "書店";
 			String encodeMainKeyword = java.net.URLEncoder.encode(mainKeyword, "utf-8");
 
-			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
-
+//			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
+			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=2";
+			
 			// this.url =
 			// "https://www.google.com/search?q="+searchKeyword+"&oe=utf8&num=20";
 		} catch (Exception e) {
@@ -89,12 +94,20 @@ public class GoogleQuery {
 					continue;
 				}
 
-				System.out.println("Title: " + title + " , url: " + citeUrl);
 
-				String decodedUrl = URLDecoder.decode(citeUrl, "UTF-8");// 原本的url不能訪問，要先解碼
-				String trueUrl = removeQueryParams(decodedUrl);
+				citeUrl = URLDecoder.decode(citeUrl, "UTF-8");// 原本的url不能訪問，要先解碼
+				citeUrl = removeQueryParams(citeUrl);
 				// put title and pair into HashMap
-				retVal.put(title, trueUrl);
+				retVal.put(title, citeUrl);
+				page = new WebPage(citeUrl);
+				ArrayList<Keyword> keywords = new ArrayList<Keyword>();
+				Keyword testkey = new Keyword("二戰",10);
+				keywords.add(testkey);
+				page.setScore(keywords);
+				
+				System.out.println("Fetched content: " + content);
+				System.out.println("Title: " + title + " \n url: " + citeUrl + "\n score: " + page.score);
+				
 
 			} catch (IndexOutOfBoundsException e) {
 //				e.printStackTrace();
@@ -112,5 +125,7 @@ public class GoogleQuery {
 
 		return queryStartIndex != -1 ? url.substring(0, queryStartIndex) : url;
 	}
+	
+	
 
 }
