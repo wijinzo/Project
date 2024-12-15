@@ -105,7 +105,7 @@ public class GoogleQuery {
 				keywords.add(testkey);
 				page.setScore(keywords);
 				
-				System.out.println("Fetched content: " + content);
+//				System.out.println("Fetched content: " + content);
 				System.out.println("Title: " + title + " \n url: " + citeUrl + "\n score: " + page.score);
 				
 
