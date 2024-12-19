@@ -7,7 +7,7 @@ public class Keyword {
 	public int count;
 	public double weight;
 	
-	public Keyword(String name, double weight){
+	public Keyword(String name,float weight){
 		this.name = name;
 		this.count = 0;
 		this.weight = weight;
@@ -17,7 +17,7 @@ public class Keyword {
 	}
 	
 
-	@Override
+	//@Override
 	//public String toString(){
 	//	return "["+name+","+count+","+weight+"]";
 	//}
