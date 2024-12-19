@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.URLDecoder;
 import java.util.regex.*;
@@ -19,9 +20,11 @@ public class GoogleQuery {
 	public String searchKeyword;
 	public String url;
 	public String content;
+	private ArrayList<String> urList; 
 
 	public GoogleQuery(String searchKeyword) {
 		this.searchKeyword = searchKeyword;
+		this.urList = new ArrayList<>();
 		try {
 			// This part has been specially handled for Chinese keyword processing.
 			// You can comment out the following two lines
@@ -95,6 +98,7 @@ public class GoogleQuery {
 				String trueUrl = removeQueryParams(decodedUrl);
 				// put title and pair into HashMap
 				retVal.put(title, trueUrl);
+				urList.add(trueUrl);
 
 			} catch (IndexOutOfBoundsException e) {
 //				e.printStackTrace();
@@ -112,5 +116,8 @@ public class GoogleQuery {
 
 		return queryStartIndex != -1 ? url.substring(0, queryStartIndex) : url;
 	}
-
+	
+	public ArrayList<String> getUrList(){
+		return urList;
+	}
 }
