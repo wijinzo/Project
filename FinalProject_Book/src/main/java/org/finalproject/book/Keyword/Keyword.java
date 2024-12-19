@@ -19,6 +19,10 @@ public class Keyword {
 	//	return "["+name+","+count+","+weight+"]";
 	//}
 	
+	public Keyword() {
+		setBookList();
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
