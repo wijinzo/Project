@@ -10,7 +10,6 @@ public class Keyword {
 	
 	public Keyword(String name,float weight){
 		this.name = name;
-		this.count = 0;
 		this.weight = weight;
 		this.bookList = new ArrayList<>();
 	}
@@ -46,23 +45,17 @@ public class Keyword {
 		bookList.add(new Keyword("節錄", 5));
 	}
 	
-    public int getCount()
-    {
-    	return count;
+    public int getCount() {
+       	return count;
     }
     
-    public String getName()
-    {
+    public String getName() {
     	return name;
     }
     
-    public double getWeight()
-    {
+    public double getWeight(){
     	return weight;
     }
     
-    public void addCount() {
-    	count++;
-    }
     
 }
