@@ -61,5 +61,8 @@ public class Keyword {
     	return weight;
     }
     
+    public void addCount() {
+    	count++;
+    }
     
 }
