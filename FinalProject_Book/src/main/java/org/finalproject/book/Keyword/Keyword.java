@@ -3,15 +3,14 @@ package org.finalproject.book.Keyword;
 import java.util.ArrayList;
 
 public class Keyword {
-	public String name;
-	public int count;
-	public double weight;
-	private ArrayList<Keyword> bookList;
+	private String name;
+	private int count;
+	private float weight;
+	private static final ArrayList<Keyword> bookList = new ArrayList<>();
 	
 	public Keyword(String name,float weight){
 		this.name = name;
 		this.weight = weight;
-		this.bookList = new ArrayList<>();
 	}
 	
 	//@Override
@@ -20,18 +19,26 @@ public class Keyword {
 	//}
 	
 	public Keyword() {
-		setBookList();
+		
 	}
 	
 	public void setName(String name) {
 		this.name = name;
 	}
 	
+	public String getName() {
+    	return name;
+    }
+	
 	public void setWeight(float weight) {
 		this.weight = weight;
 	}
 	
-	public void setBookList() {
+	public float getWeight(){
+    	return weight;
+    }
+	
+	static {
 		bookList.add(new Keyword("書籍", 10));
 		bookList.add(new Keyword("出版社", 10));
 		bookList.add(new Keyword("書評", 6));
@@ -49,17 +56,19 @@ public class Keyword {
 		bookList.add(new Keyword("節錄", 5));
 	}
 	
+	public void setCount(int count) {
+		this.count = count;
+	}
+	
     public int getCount() {
        	return count;
     }
-    
-    public String getName() {
-    	return name;
+  
+    public void addCount() {
+    	count++;
     }
     
-    public double getWeight(){
-    	return weight;
+    public ArrayList<Keyword> getBookList(){
+    	return bookList;
     }
-    
-    
 }
