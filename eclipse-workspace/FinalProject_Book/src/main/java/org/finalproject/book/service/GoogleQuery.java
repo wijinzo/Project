@@ -7,11 +7,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.net.URLDecoder;
-import java.util.regex.*;
 
-import org.finalproject.book.Keyword.Keyword;
+
 import org.finalproject.book.web.WebPage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,11 +31,11 @@ public class GoogleQuery {
 			// Also, consider why the results might be incorrect
 			// when entering Chinese keywords.
 			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
-			String mainKeyword = "書店";
+			String mainKeyword = " 書";
 			String encodeMainKeyword = java.net.URLEncoder.encode(mainKeyword, "utf-8");
 
 //			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
-			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=2";
+			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=10";
 			
 			// this.url =
 			// "https://www.google.com/search?q="+searchKeyword+"&oe=utf8&num=20";
@@ -47,8 +45,7 @@ public class GoogleQuery {
 	}
 
 	private String fetchContent() throws IOException {
-		String retVal = "";
-
+		StringBuilder retVal = new StringBuilder();
 		URL u = new URL(url);
 		URLConnection conn = u.openConnection();
 		// set HTTP header
@@ -60,27 +57,20 @@ public class GoogleQuery {
 		String line = null;
 
 		while ((line = bufReader.readLine()) != null) {
-			retVal += line;
+			retVal.append(line);
 		}
-		return retVal;
+		return retVal.toString();
 	}
 
-	public HashMap<String, String> query() throws IOException {
-		if (content == null) {
-			content = fetchContent();
-		}
+	public ArrayList<SearchResult> query() throws IOException {
+        if (content == null) {
+            content = fetchContent();
+        }
 
-		HashMap<String, String> retVal = new HashMap<String, String>();
-
-		/*
-		 * some Jsoup source
-		 * https://jsoup.org/apidocs/org/jsoup/nodes/package-summary.html
-		 * https://www.1ju.org/jsoup/jsoup-quick-start
-		 */
+        ArrayList<SearchResult> results = new ArrayList<>();
 
 		// using Jsoup analyze html string
 		Document doc = Jsoup.parse(content);
-
 		// select particular element(tag) which you want
 		Elements lis = doc.select("div");
 		lis = lis.select(".kCrYT");
@@ -89,23 +79,18 @@ public class GoogleQuery {
 			try {
 				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
 				String title = li.select("a").get(0).select(".vvjwJb").text();
+				String siteName = li.select("cite").text();
+
 
 				if (title.equals("")) {
 					continue;
 				}
-
-
+				
 				citeUrl = URLDecoder.decode(citeUrl, "UTF-8");// 原本的url不能訪問，要先解碼
 				citeUrl = removeQueryParams(citeUrl);
-				// put title and pair into HashMap
-				retVal.put(title, citeUrl);
-				page = new WebPage(citeUrl);
-				ArrayList<Keyword> keywords = new ArrayList<Keyword>();
-				Keyword testkey = new Keyword("二戰",10);
-				keywords.add(testkey);
-				page.setScore(keywords);
 				
-				System.out.println("Title: " + title + " \n url: " + citeUrl + "\n score: " + page.score);
+				SearchResult result = new SearchResult(title, citeUrl, siteName);
+				results.add(result);
 				
 
 			} catch (IndexOutOfBoundsException e) {
@@ -113,7 +98,7 @@ public class GoogleQuery {
 			}
 		}
 
-		return retVal;
+		return results;
 	}
 
 	public static String removeQueryParams(String url) {
@@ -125,6 +110,15 @@ public class GoogleQuery {
 		return queryStartIndex != -1 ? url.substring(0, queryStartIndex) : url;
 	}
 	
-	
-
+	public static void main(String[] args) {
+		try {
+			GoogleQuery googleQuery = new GoogleQuery("二戰");
+			ArrayList<SearchResult> results = googleQuery.query();
+			for (SearchResult result : results) {
+				System.out.println(result);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

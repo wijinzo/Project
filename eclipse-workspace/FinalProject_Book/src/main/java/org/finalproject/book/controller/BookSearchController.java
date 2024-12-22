@@ -1,9 +1,11 @@
 package org.finalproject.book.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.finalproject.book.service.GoogleQuery;
+import org.finalproject.book.service.SearchResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,13 +22,13 @@ public class BookSearchController {
 
     @PostMapping("/search")
     public String search(@RequestParam("keyword") String keyword, Model model) {
-        HashMap<String, String> results;
+        ArrayList<SearchResult> results;//hash map不見了
         try {
             GoogleQuery googleQueryService = new GoogleQuery(keyword);
             results = googleQueryService.query();
             System.out.println("搜尋結果: " + results);  // 打印結果到控制台
             model.addAttribute("results", results);  // 將結果添加到模型中
-            System.out.println("Result Titles: " + results.keySet());
+//            System.out.println("Result Titles: " + results.keySet());
 
         } catch (IOException e) {
             e.printStackTrace();

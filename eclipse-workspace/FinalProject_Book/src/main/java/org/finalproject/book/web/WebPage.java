@@ -6,14 +6,17 @@ import org.finalproject.book.Keyword.Keyword;
 import org.finalproject.book.Keyword.WordCounter;
 
 public class WebPage{
-	public String url;
-	public String name;
-	public WordCounter counter;
-	public double score;
-
-	public WebPage(String url){
+	private String url;
+	private String name;
+	private WordCounter counter;
+	private double score;
+	private String content;
+	
+	public WebPage(String url,String content){
 		this.url = url;
-		this.counter = new WordCounter(this.url);
+		this.content = content;
+		this.counter = new WordCounter(url,content);
+		
 		
 	}
 //	public WebPage(String url, String name){
@@ -21,6 +24,14 @@ public class WebPage{
 //		this.name = name;
 //		this.counter = new WordCounter(url);
 //	}
+	
+	 public String getUrl() {
+	        return url;
+	    }
+
+    public String getContent() {
+        return content;
+    }
 
 	public void setScore(ArrayList<Keyword> keywords) throws IOException{
 		score = 0;
@@ -28,8 +39,7 @@ public class WebPage{
 		// 1. calculate the score of this webPage
 		for(Keyword keyword:keywords ) {
 			counter.countKeyword(keyword);
-			score += keyword.count*keyword.weight;
-		}
+			score += keyword.getCount()*keyword.getWeight();		}
 
 	}
 	
