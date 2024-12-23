@@ -31,8 +31,8 @@ public class BookSearchController {
             GoogleQuery googleQueryService = new GoogleQuery(keyword);
             WebPageProcessor webPageProcessor = new WebPageProcessor();
             results = googleQueryService.query();
-            webPageProcessor.getWebSummary(keyword, results);
-
+            results = webPageProcessor.setScore(keyword, results);
+            
             logger.info("搜尋結果數量: {}", results.size());
             model.addAttribute("results", results);
 

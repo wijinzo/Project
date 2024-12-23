@@ -4,6 +4,7 @@ import org.finalproject.book.web.WebNode;
 import org.finalproject.book.web.WebPage;
 import org.finalproject.book.web.WebTree;
 import org.jsoup.Jsoup;
+import org.apache.logging.log4j.util.PropertySource.Comparator;
 import org.finalproject.book.Keyword.Keyword;
 import org.finalproject.book.Keyword.WordCounter;
 import org.jsoup.nodes.Document;
@@ -18,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class WebPageProcessor {
 
@@ -61,14 +63,14 @@ public class WebPageProcessor {
 		return retVal.toString(); // 返回內容
 	}
 
-	// 計算總分
-	public int calculateTotalScore(ArrayList<Keyword> keywords) {
-		int totalScore = 0;
-		for (Keyword keyword : keywords) {
-			totalScore += keyword.getCount() * keyword.getWeight();
-		}
-		return totalScore;
-	}
+//	// 計算總分
+//	public int calculateTotalScore(ArrayList<Keyword> keywords) {
+//		int totalScore = 0;
+//		for (Keyword keyword : keywords) {
+//			totalScore += keyword.getCount() * keyword.getWeight();
+//		}
+//		return totalScore;
+//	}
 
 	// 提取純文本內容
 	public String extractText(String htmlContent) {
@@ -107,29 +109,29 @@ public class WebPageProcessor {
 
 		return links; // 返回符合條件的子連結列表
 	}
-
-	public void calculateTreeScores(WebTree webTree, ArrayList<Keyword> keywords) throws IOException {
-		// 設置分數，從樹的底部向上遞歸計算
-		webTree.setPostOrderScore(keywords);
+	
+	public void sortTree(ArrayList<SearchResult> results) {
+	    results.sort((result1, result2) -> Double.compare(result2.getTree().root.nodeScore, result1.getTree().root.nodeScore));
 	}
 
-	public void getWebSummary(String searchKeyword, ArrayList<SearchResult> results) {
+
+	public ArrayList<SearchResult> setScore(String searchKeyword, ArrayList<SearchResult> results) {
+		ArrayList<WebTree> sort = new ArrayList<WebTree>();
 		try {
 			for (SearchResult result : results) {
 				// Retrieving the URL from the SearchResult
 				String url = result.getUrl();
 				String content = fetchContentFromUrl(url);
-
+				
 				if (content == null || content.isEmpty()) {
 					System.out.println("Failed to fetch content or content is empty from: " + url);
 					continue; // Skip if no content is retrieved
 				}
 
 				String textContent = extractText(content);
+				System.out.println("textContent"+textContent);
 				WebPage rootPage = new WebPage(result.getUrl(), textContent);
-//				WebNode root = new WebNode(rootPage);
 				WebTree tree = new WebTree(rootPage);
-				// Extracting text content
 
 				// Defining default keywords
 				ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
@@ -143,11 +145,11 @@ public class WebPageProcessor {
 //				 Printing out the results
 				System.out.println("URL: " + rootPage.getUrl());
 				System.out.println("Title: " + result.getTitle());
-				System.out.println("Site Name: " + result.getSiteName());
-				System.out.println(
-						"First 500 characters: " + textContent.substring(0, Math.min(500, textContent.length()))); // First
-																													// 500
-																													// characters
+//				System.out.println("Site Name: " + result.getSiteName());
+//				System.out.println(
+//						"First 500 characters: " + textContent.substring(0, Math.min(500, textContent.length()))); // First
+				// 500
+				// characters
 				for (Keyword keyword : keywords) {
 					System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
 				}
@@ -181,67 +183,72 @@ public class WebPageProcessor {
 
 						// Calculate total score for the link content
 //						int linkTotalScore = calculateTotalScore(linkKeywords);
-						
+
 						// Printing the results for the link
 						for (Keyword keyword : keywords) {
 							System.out.println("Link Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
 						}
 					}
 				}
+				result.setTree(tree);
 				System.out.println("Total Score: " + tree.root.nodeScore);
 			}
+			
 		} catch (Exception e) {
 			System.out.println("Error processing the search results: " + e.getMessage());
 			e.printStackTrace();
+			return null;
 		}
+		sortTree(results);
+		return results;
 	}
 
-	public static void main(String[] args) {
-		try {
-			String searchKeyword = "二戰";
-			GoogleQuery googleQuery = new GoogleQuery(searchKeyword);
-			ArrayList<SearchResult> results = googleQuery.query();
-			WebPageProcessor processor = new WebPageProcessor();
-			WebTree webTree = new WebTree(null); // 初始化空的 WebTree
-			for (SearchResult result : results) {
-				String url = result.getUrl();
-				String content = processor.fetchContentFromUrl(url);
-				if (content == null || content.isEmpty()) {
-					System.out.println("Failed to fetch content or content is empty from: " + url);
-					continue;
-				}
-				WebPage webPage = new WebPage(url, content);
-				WebNode node = new WebNode(webPage);
-				// 提取純文本內容
-				String textContent = processor.extractText(content);
-				// 設置關鍵字
-				ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
-				// 計算關鍵字出現次數
-				WordCounter.calculateKeywordCounts(textContent, keywords);
-
-				if (webTree.getRoot() == null) {
-					webTree = new WebTree(webPage);
-				} else {
-					webTree.root.addChild(node); // 作為根的子節點
-				}
-				// 抓取子連結
-				int[] totalLinksChecked = { 0 };
-				ArrayList<WebPage> linksWithTitleContainingKeyword = processor.fetchLinksWithTitleContainingKeyword(url,
-						searchKeyword, totalLinksChecked);
-				for (WebPage link : linksWithTitleContainingKeyword) {
-					WebNode childNode = new WebNode(link);
-					node.addChild(childNode);
-				}
-			}
-			// 計算整棵樹的分數
-			ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
-			processor.calculateTreeScores(webTree, keywords);
-			// 按分數排序並打印樹的結構
-//			webTree.sortNodesByScore(webTree.getRoot());
-//			webTree.printTree(webTree.getRoot(), 0);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args) {
+//		try {
+//			String searchKeyword = "二戰";
+//			GoogleQuery googleQuery = new GoogleQuery(searchKeyword);
+//			ArrayList<SearchResult> results = googleQuery.query();
+//			WebPageProcessor processor = new WebPageProcessor();
+//			WebTree webTree = new WebTree(null); // 初始化空的 WebTree
+//			for (SearchResult result : results) {
+//				String url = result.getUrl();
+//				String content = processor.fetchContentFromUrl(url);
+//				if (content == null || content.isEmpty()) {
+//					System.out.println("Failed to fetch content or content is empty from: " + url);
+//					continue;
+//				}
+//				WebPage webPage = new WebPage(url, content);
+//				WebNode node = new WebNode(webPage);
+//				// 提取純文本內容
+//				String textContent = processor.extractText(content);
+//				// 設置關鍵字
+//				ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
+//				// 計算關鍵字出現次數
+//				WordCounter.calculateKeywordCounts(textContent, keywords);
+//
+//				if (webTree.getRoot() == null) {
+//					webTree = new WebTree(webPage);
+//				} else {
+//					webTree.root.addChild(node); // 作為根的子節點
+//				}
+//				// 抓取子連結
+//				int[] totalLinksChecked = { 0 };
+//				ArrayList<WebPage> linksWithTitleContainingKeyword = processor.fetchLinksWithTitleContainingKeyword(url,
+//						searchKeyword, totalLinksChecked);
+//				for (WebPage link : linksWithTitleContainingKeyword) {
+//					WebNode childNode = new WebNode(link);
+//					node.addChild(childNode);
+//				}
+//			}
+//			// 計算整棵樹的分數
+//			ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
+//			processor.calculateTreeScores(webTree, keywords);
+//			// 按分數排序並打印樹的結構
+////			webTree.sortNodesByScore(webTree.getRoot());
+////			webTree.printTree(webTree.getRoot(), 0);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 }
