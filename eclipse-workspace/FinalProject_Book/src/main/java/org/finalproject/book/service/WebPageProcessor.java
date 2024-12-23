@@ -109,9 +109,7 @@ public class WebPageProcessor {
 
 	public void getWeb(String searchKeyword, ArrayList<SearchResult> results) {
 		try {
-			GoogleQuery googleQuery = new GoogleQuery(searchKeyword);
-			results = googleQuery.query();
-
+			
 			for (SearchResult result : results) {
 				// 調用 SearchResult 中儲存的網址
 				String url = result.getUrl();
