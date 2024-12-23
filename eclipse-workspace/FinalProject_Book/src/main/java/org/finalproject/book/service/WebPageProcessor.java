@@ -134,32 +134,32 @@ public class WebPageProcessor {
 	            int totalScore = calculateTotalScore(keywords);
 
 	            // Printing out the results
-	            System.out.println("URL: " + webPage.getUrl());
-	            System.out.println("Title: " + result.getTitle());
+//	            System.out.println("URL: " + webPage.getUrl());
+//	            System.out.println("Title: " + result.getTitle());
 //	            System.out.println("Site Name: " + result.getSiteName());
 //	            System.out.println("First 500 characters: " + textContent.substring(0, Math.min(500, textContent.length()))); // First 500 characters
 	            for (Keyword keyword : keywords) {
-	                System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+//	                System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
 	            }
 
-	            System.out.println("Total Score: " + totalScore);
+//	            System.out.println("Total Score: " + totalScore);
 
 	            // Fetch links that contain the keyword in the title
 	            int[] totalLinksChecked = {0}; // Tracks the number of links checked
 	            ArrayList<WebPage> linksWithTitleContainingKeyword = fetchLinksWithTitleContainingKeyword(url, searchKeyword, totalLinksChecked);
-	            System.out.println("Total links checked: " + totalLinksChecked[0]);
-	            System.out.println("Links containing the search keyword:");
+//	            System.out.println("Total links checked: " + totalLinksChecked[0]);
+//	            System.out.println("Links containing the search keyword:");
 	            if (linksWithTitleContainingKeyword.isEmpty()) {
 	                System.out.println("No valid links found.");
 	            } else {
 	                for (WebPage link : linksWithTitleContainingKeyword) {
-	                    System.out.println(link.getUrl());
+//	                    System.out.println(link.getUrl());
 
 	                    // For each link, fetch its content and perform keyword extraction
 	                    try {
 	                        String linkContent = fetchContentFromUrl(link.getUrl());
 	                        if (linkContent == null || linkContent.isEmpty()) {
-	                            System.out.println("No content found for the link: " + link.getUrl());
+//	                            System.out.println("No content found for the link: " + link.getUrl());
 	                            continue;
 	                        }
 
@@ -172,13 +172,13 @@ public class WebPageProcessor {
 
 	                        // Printing the results for the link
 	                        for (Keyword keyword : linkKeywords) {
-	                            System.out.println("Link Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+//	                            System.out.println("Link Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
 	                        }
 
-	                        System.out.println("Link Total Score: " + linkTotalScore);
+//	                        System.out.println("Link Total Score: " + linkTotalScore);
 
 	                    } catch (IOException e) {
-	                        System.out.println("Error processing link: " + link.getUrl());
+//	                        System.out.println("Error processing link: " + link.getUrl());
 	                        e.printStackTrace();
 	                    }
 	                }
