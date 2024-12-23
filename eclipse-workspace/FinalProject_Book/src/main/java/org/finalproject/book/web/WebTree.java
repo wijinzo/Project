@@ -28,6 +28,15 @@ public class WebTree {
 
 	}
 
+	public WebNode getRoot() {
+		return root;
+	}
+	
+	public void addChild(WebNode child){
+		// add the WebNode to its children list
+		root.addChild(child);
+	}
+	
 //	private String repeat(String str, int repeat) {
 //		String retVal = "";
 //		for (int i = 0; i < repeat; i++) {

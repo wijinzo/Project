@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.List;
 
 public class WordCounter {
 	private String urlStr;
@@ -36,27 +35,27 @@ public class WordCounter {
 //		return retVal;
 //	}
 
-	public void countKeyword(Keyword keyword) throws IOException {
-//		if (content == null) {
-//			content = fetchContent();
+//	public void countKeyword(Keyword keyword) throws IOException {
+////		if (content == null) {
+////			content = fetchContent();
+////		}
+//
+//		// To do a case-insensitive search, we turn the whole content and keyword into
+//		// upper-case:
+//		content = content.toUpperCase();
+//		String searchKeyword = keyword.getWord().toUpperCase();
+//
+//		int fromIdx = 0;
+//		int found = -1;
+//
+//		while ((found = content.indexOf(searchKeyword, fromIdx)) != -1) {
+//			//keyword.addCount();
+//			fromIdx = found + searchKeyword.length();
 //		}
-
-		// To do a case-insensitive search, we turn the whole content and keyword into
-		// upper-case:
-		content = content.toUpperCase();
-		String searchKeyword = keyword.getWord().toUpperCase();
-
-		int fromIdx = 0;
-		int found = -1;
-
-		while ((found = content.indexOf(searchKeyword, fromIdx)) != -1) {
-			//keyword.addCount();
-			fromIdx = found + searchKeyword.length();
-		}
-	    System.out.println("Keyword: " + keyword.getWord() + " found " + keyword.getCount() + " times");
-
-
-	}
+//	    System.out.println("Keyword: " + keyword.getWord() + " found " + keyword.getCount() + " times");
+//
+//
+//	}
 
 	// 計算單個關鍵字出現次數
     public static int countKeywordOccurrences(String content, String keyword) {
@@ -72,7 +71,7 @@ public class WordCounter {
     }
 
     // 計算所有關鍵字的出現次數
-    public static void calculateKeywordCounts(String content, List<Keyword> keywords) {
+    public static void calculateKeywordCounts(String content, ArrayList<Keyword> keywords) {
         for (Keyword keyword : keywords) {
             int count = countKeywordOccurrences(content, keyword.getWord());
             keyword.setCount(count);

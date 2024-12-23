@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.finalproject.book.Keyword.Keyword;
 import org.finalproject.book.Keyword.WordCounter;
+import org.finalproject.book.Keyword.WordCounter;
 
 public class WebPage {
 	private String url;
@@ -41,10 +42,11 @@ public class WebPage {
 		// YOUR TURN
 		// 1. calculate the score of this webPage
 		for (Keyword keyword : keywords) {
-			counter.countKeyword(keyword);
+			counter.calculateKeywordCounts(content,keywords);
 			score += keyword.getCount() * keyword.getWeight();
 		}
 
 	}
+	
 
 }

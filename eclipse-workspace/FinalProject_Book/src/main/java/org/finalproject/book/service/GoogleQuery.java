@@ -35,7 +35,7 @@ public class GoogleQuery {
 			String encodeMainKeyword = java.net.URLEncoder.encode(mainKeyword, "utf-8");
 
 //			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
-			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=10";
+			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=5";
 			
 			// this.url =
 			// "https://www.google.com/search?q="+searchKeyword+"&oe=utf8&num=20";

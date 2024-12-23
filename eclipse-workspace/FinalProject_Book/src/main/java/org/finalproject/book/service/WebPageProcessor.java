@@ -1,6 +1,8 @@
 package org.finalproject.book.service;
 
+import org.finalproject.book.web.WebNode;
 import org.finalproject.book.web.WebPage;
+import org.finalproject.book.web.WebTree;
 import org.jsoup.Jsoup;
 import org.finalproject.book.Keyword.Keyword;
 import org.finalproject.book.Keyword.WordCounter;
@@ -74,7 +76,6 @@ public class WebPageProcessor {
 		return doc.text();
 	}
 
-	// 抓取主頁中的前三個子連結
 	public ArrayList<WebPage> fetchLinksWithTitleContainingKeyword(String url, String searchKeyword,
 			int[] totalLinksChecked) throws IOException {
 		ArrayList<WebPage> links = new ArrayList<>();
@@ -107,87 +108,92 @@ public class WebPageProcessor {
 		return links; // 返回符合條件的子連結列表
 	}
 
+	public void calculateTreeScores(WebTree webTree, ArrayList<Keyword> keywords) throws IOException {
+		// 設置分數，從樹的底部向上遞歸計算
+		webTree.setPostOrderScore(keywords);
+	}
+
 	public void getWebSummary(String searchKeyword, ArrayList<SearchResult> results) {
-	    try {
-	        for (SearchResult result : results) {
-	            // Retrieving the URL from the SearchResult
-	            String url = result.getUrl();
-	            String content = fetchContentFromUrl(url);
+		try {
+			for (SearchResult result : results) {
+				// Retrieving the URL from the SearchResult
+				String url = result.getUrl();
+				String content = fetchContentFromUrl(url);
 
-	            if (content == null || content.isEmpty()) {
-	                System.out.println("Failed to fetch content or content is empty from: " + url);
-	                continue; // Skip if no content is retrieved
-	            }
+				if (content == null || content.isEmpty()) {
+					System.out.println("Failed to fetch content or content is empty from: " + url);
+					continue; // Skip if no content is retrieved
+				}
 
-	            WebPage webPage = new WebPage(result.getUrl(), content);
+				String textContent = extractText(content);
+				WebPage rootPage = new WebPage(result.getUrl(), textContent);
+//				WebNode root = new WebNode(rootPage);
+				WebTree tree = new WebTree(rootPage);
+				// Extracting text content
 
-	            // Extracting text content
-	            String textContent = extractText(content);
+				// Defining default keywords
+				ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
 
-	            // Defining default keywords
-	            ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
+				// Counting the occurrences of the keywords
+//				WordCounter.calculateKeywordCounts(textContent, keywords);
 
-	            // Counting the occurrences of the keywords
-	            WordCounter.calculateKeywordCounts(textContent, keywords);
-
-	            // Calculating total score based on the keywords found
-	            int totalScore = calculateTotalScore(keywords);
-
-	            // Printing out the results
-//	            System.out.println("URL: " + webPage.getUrl());
-//	            System.out.println("Title: " + result.getTitle());
-//	            System.out.println("Site Name: " + result.getSiteName());
-//	            System.out.println("First 500 characters: " + textContent.substring(0, Math.min(500, textContent.length()))); // First 500 characters
-	            for (Keyword keyword : keywords) {
-//	                System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
-	            }
+				// Calculating total score based on the keywords found
+//				int totalScore = calculateTotalScore(keywords);
+				tree.root.setNodeScore(keywords);
+//				 Printing out the results
+				System.out.println("URL: " + rootPage.getUrl());
+				System.out.println("Title: " + result.getTitle());
+				System.out.println("Site Name: " + result.getSiteName());
+				System.out.println(
+						"First 500 characters: " + textContent.substring(0, Math.min(500, textContent.length()))); // First
+																													// 500
+																													// characters
+				for (Keyword keyword : keywords) {
+					System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+				}
 
 //	            System.out.println("Total Score: " + totalScore);
 
-	            // Fetch links that contain the keyword in the title
-	            int[] totalLinksChecked = {0}; // Tracks the number of links checked
-	            ArrayList<WebPage> linksWithTitleContainingKeyword = fetchLinksWithTitleContainingKeyword(url, searchKeyword, totalLinksChecked);
-//	            System.out.println("Total links checked: " + totalLinksChecked[0]);
-//	            System.out.println("Links containing the search keyword:");
-	            if (linksWithTitleContainingKeyword.isEmpty()) {
-	                System.out.println("No valid links found.");
-	            } else {
-	                for (WebPage link : linksWithTitleContainingKeyword) {
-//	                    System.out.println(link.getUrl());
+				// Fetch links that contain the keyword in the title
+				int[] totalLinksChecked = { 0 }; // Tracks the number of links checked
+				ArrayList<WebPage> subWebPages = fetchLinksWithTitleContainingKeyword(url, searchKeyword,
+						totalLinksChecked);
+				System.out.println("Total links checked: " + totalLinksChecked[0]);
+				System.out.println("Links containing the search keyword:");
+				if (subWebPages.isEmpty()) {
+					System.out.println(url + " no valid links found.");
+				} else {
+					for (WebPage childPage : subWebPages) {
+						WebNode childNode = new WebNode(childPage);
+						String link = childPage.getUrl();
+						System.out.println(link);
+						tree.addChild(childNode);
+						// For each link, fetch its content and perform keyword extraction
+						String childContent = childPage.getContent();
+						if (childContent == null || childContent.isEmpty()) {
+							System.out.println("No content found for the link: " + link);
+							continue;
+						}
 
-	                    // For each link, fetch its content and perform keyword extraction
-	                    try {
-	                        String linkContent = fetchContentFromUrl(link.getUrl());
-	                        if (linkContent == null || linkContent.isEmpty()) {
-//	                            System.out.println("No content found for the link: " + link.getUrl());
-	                            continue;
-	                        }
+						String linkTextContent = extractText(childContent);
+						tree.setPostOrderScore(keywords);
+//						WordCounter.calculateKeywordCounts(linkTextContent, linkKeywords);
 
-	                        String linkTextContent = extractText(linkContent);
-	                        ArrayList<Keyword> linkKeywords = Keyword.getDefaultKeywords();
-	                        WordCounter.calculateKeywordCounts(linkTextContent, linkKeywords);
-
-	                        // Calculate total score for the link content
-	                        int linkTotalScore = calculateTotalScore(linkKeywords);
-
-	                        // Printing the results for the link
-	                        for (Keyword keyword : linkKeywords) {
-//	                            System.out.println("Link Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
-	                        }
-
-//	                        System.out.println("Link Total Score: " + linkTotalScore);
-
-	                    } catch (IOException e) {
-//	                        System.out.println("Error processing link: " + link.getUrl());
-	                        e.printStackTrace();
-	                    }
-	                }
-	            }
-	        }
-	    } catch (Exception e) {
-	        System.out.println("Error processing the search results: " + e.getMessage());
-	        e.printStackTrace();
-	    }
+						// Calculate total score for the link content
+//						int linkTotalScore = calculateTotalScore(linkKeywords);
+						
+						// Printing the results for the link
+						for (Keyword keyword : keywords) {
+							System.out.println("Link Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+						}
+					}
+				}
+				System.out.println("Total Score: " + tree.root.nodeScore);
+			}
+		} catch (Exception e) {
+			System.out.println("Error processing the search results: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -195,55 +201,47 @@ public class WebPageProcessor {
 			String searchKeyword = "二戰";
 			GoogleQuery googleQuery = new GoogleQuery(searchKeyword);
 			ArrayList<SearchResult> results = googleQuery.query();
-
 			WebPageProcessor processor = new WebPageProcessor();
+			WebTree webTree = new WebTree(null); // 初始化空的 WebTree
 			for (SearchResult result : results) {
-				// 調用 SearchResult 中儲存的網址
 				String url = result.getUrl();
 				String content = processor.fetchContentFromUrl(url);
-				WebPage webPage = new WebPage(result.getUrl(), content);
-
+				if (content == null || content.isEmpty()) {
+					System.out.println("Failed to fetch content or content is empty from: " + url);
+					continue;
+				}
+				WebPage webPage = new WebPage(url, content);
+				WebNode node = new WebNode(webPage);
 				// 提取純文本內容
 				String textContent = processor.extractText(content);
-
 				// 設置關鍵字
 				ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
-
 				// 計算關鍵字出現次數
 				WordCounter.calculateKeywordCounts(textContent, keywords);
 
-				// 計算總分
-				int totalScore = processor.calculateTotalScore(keywords);
-
-				// 打印結果
-				System.out.println("網址: " + webPage.getUrl());
-				System.out.println("標題: " + result.getTitle());
-				System.out.println("網站名稱: " + result.getSiteName());
-				System.out.println("前500字: " + textContent.substring(0, Math.min(500, textContent.length()))); // 提取前500字
-				for (Keyword keyword : keywords) {
-					System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+				if (webTree.getRoot() == null) {
+					webTree = new WebTree(webPage);
+				} else {
+					webTree.root.addChild(node); // 作為根的子節點
 				}
-
-				System.out.println("總分: " + totalScore);
-
-				// 抓取主頁中所有 title 或文本包含搜索關鍵字的子連結
-				int[] totalLinksChecked = { 0 }; // 用於計算總共檢查的連結數量
+				// 抓取子連結
+				int[] totalLinksChecked = { 0 };
 				ArrayList<WebPage> linksWithTitleContainingKeyword = processor.fetchLinksWithTitleContainingKeyword(url,
 						searchKeyword, totalLinksChecked);
-				System.out.println("總共檢查的連結數量: " + totalLinksChecked[0]);
-				System.out.println("包含搜索詞子連結:");
-				if (linksWithTitleContainingKeyword.isEmpty()) {
-					System.out.println("無有效連結");
-				} else {
-					for (WebPage link : linksWithTitleContainingKeyword) {
-						System.out.println(link.getUrl());
-						System.out.println(link.getContent().substring(0, Math.min(500, link.getContent().length())));
-
-					}
+				for (WebPage link : linksWithTitleContainingKeyword) {
+					WebNode childNode = new WebNode(link);
+					node.addChild(childNode);
 				}
 			}
+			// 計算整棵樹的分數
+			ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
+			processor.calculateTreeScores(webTree, keywords);
+			// 按分數排序並打印樹的結構
+//			webTree.sortNodesByScore(webTree.getRoot());
+//			webTree.printTree(webTree.getRoot(), 0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
 }
