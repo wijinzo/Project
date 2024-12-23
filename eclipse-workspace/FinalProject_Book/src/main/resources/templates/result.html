@@ -46,7 +46,7 @@
         <!-- 替換為動態內容 -->
         <div th:each="result : ${results}">
             <div class="result-item">
-                <a th:href="${result.value}" th:text="${result.key}"></a>
+                <a th:href="${result.url}" th:text="${result.title}"></a>
             </div>
         </div>
         <!-- 若沒有結果，顯示訊息 -->

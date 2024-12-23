@@ -18,13 +18,7 @@ public class WebNode
 	}
 
 	public void setNodeScore(ArrayList<Keyword> keywords) throws IOException{
-		// YOUR TURN
-		// 2. calculate the score of this node
-		// this method should be called in post-order mode
-		// You should do something like:
-		// 		1.compute the score of this webPage
-		// 		2.set this score to initialize nodeScore
-		//		3.nodeScore must be the score of this webPage plus all children's nodeScore
+		
 		webPage.setScore(keywords);
 		nodeScore += webPage.getScore() ;
 		for(WebNode child:children) {
