@@ -18,45 +18,45 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 
 public class WebPageProcessor {
-	
+
 	public WebPageProcessor() {
-		
+
 	}
-	
+
 	// 抓取網頁內容
 	public String fetchContentFromUrl(String url) throws IOException {
-	    StringBuilder retVal = new StringBuilder();
-	    
-	    URL u = new URL(url);
-	    HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-	    
-	    // 設置 User-agent，防止被認定為爬蟲
-	    conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
-	    
-	    // 獲取 HTTP 狀態碼
-	    int statusCode = conn.getResponseCode();
-	    
-	    // 如果狀態碼是 403，則代表禁止訪問，打印並跳過
-	    if (statusCode == HttpURLConnection.HTTP_FORBIDDEN) {
-	        System.out.println("無法處理連結: " + url + " (403 Forbidden)，將跳過此 URL");
-	        return "";  // 返回空字符串，跳過該 URL
-	    }
-	    
-	    try (InputStream in = conn.getInputStream();
-	         InputStreamReader inReader = new InputStreamReader(in, "utf-8");
-	         BufferedReader bufReader = new BufferedReader(inReader)) {
-	        
-	        String line;
-	        while ((line = bufReader.readLine()) != null) {
-	            retVal.append(line); // 拼接每一行的內容
-	        }
-	        
-	    } catch (IOException e) {
-	        System.out.println("無法處理連結: " + url + " 錯誤: " + e.getMessage());
-	        return "";  // 返回空字符串，跳過異常 URL
-	    }
+		StringBuilder retVal = new StringBuilder();
 
-	    return retVal.toString(); // 返回內容
+		URL u = new URL(url);
+		HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+
+		// 設置 User-agent，防止被認定為爬蟲
+		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
+
+		// 獲取 HTTP 狀態碼
+		int statusCode = conn.getResponseCode();
+
+		// 如果狀態碼是 403，則代表禁止訪問，打印並跳過
+		if (statusCode == HttpURLConnection.HTTP_FORBIDDEN) {
+			System.out.println("無法處理連結: " + url + " (403 Forbidden)，將跳過此 URL");
+			return ""; // 返回空字符串，跳過該 URL
+		}
+
+		try (InputStream in = conn.getInputStream();
+				InputStreamReader inReader = new InputStreamReader(in, "utf-8");
+				BufferedReader bufReader = new BufferedReader(inReader)) {
+
+			String line;
+			while ((line = bufReader.readLine()) != null) {
+				retVal.append(line); // 拼接每一行的內容
+			}
+
+		} catch (IOException e) {
+			System.out.println("無法處理連結: " + url + " 錯誤: " + e.getMessage());
+			return ""; // 返回空字符串，跳過異常 URL
+		}
+
+		return retVal.toString(); // 返回內容
 	}
 
 	// 計算總分
@@ -107,82 +107,114 @@ public class WebPageProcessor {
 		return links; // 返回符合條件的子連結列表
 	}
 
-	public void getWeb(String searchKeyword, ArrayList<SearchResult> results) {
-		try {
-			
-			for (SearchResult result : results) {
-				// 調用 SearchResult 中儲存的網址
-				String url = result.getUrl();
-				String content = fetchContentFromUrl(url);
-				WebPage webPage = new WebPage(result.getUrl(), content);
+	public void getWebSummary(String searchKeyword, ArrayList<SearchResult> results) {
+	    try {
+	        for (SearchResult result : results) {
+	            // Retrieving the URL from the SearchResult
+	            String url = result.getUrl();
+	            String content = fetchContentFromUrl(url);
 
-				// 提取純文本內容
-				String textContent = extractText(content);
+	            if (content == null || content.isEmpty()) {
+	                System.out.println("Failed to fetch content or content is empty from: " + url);
+	                continue; // Skip if no content is retrieved
+	            }
 
-				// 設置關鍵字
-				ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
+	            WebPage webPage = new WebPage(result.getUrl(), content);
 
-				// 計算關鍵字出現次數
-				WordCounter.calculateKeywordCounts(textContent, keywords);
+	            // Extracting text content
+	            String textContent = extractText(content);
 
-				// 計算總分
-				int totalScore = calculateTotalScore(keywords);
+	            // Defining default keywords
+	            ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
 
-				// 打印結果
-				System.out.println("網址: " + webPage.getUrl());
-				System.out.println("標題: " + result.getTitle());
-//				System.out.println("網站名稱: " + result.getSiteName());
-//				System.out.println("前500字: " + textContent.substring(0, Math.min(500, textContent.length()))); // 提取前500字
-				for (Keyword keyword : keywords) {
-					System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
-				}
+	            // Counting the occurrences of the keywords
+	            WordCounter.calculateKeywordCounts(textContent, keywords);
 
-				System.out.println("總分: " + totalScore);
+	            // Calculating total score based on the keywords found
+	            int totalScore = calculateTotalScore(keywords);
 
-				// 抓取主頁中所有 title 或文本包含搜索關鍵字的子連結
-				int[] totalLinksChecked = { 0 }; // 用於計算總共檢查的連結數量
-				ArrayList<WebPage> linksWithTitleContainingKeyword = fetchLinksWithTitleContainingKeyword(url,
-						searchKeyword, totalLinksChecked);
-				System.out.println("總共檢查的連結數量: " + totalLinksChecked[0]);
-				System.out.println("包含搜索詞子連結:");
-				if (linksWithTitleContainingKeyword.isEmpty()) {
-					System.out.println("無有效連結");
-				} else {
-					for (WebPage link : linksWithTitleContainingKeyword) {
-						System.out.println(link.getUrl());
-//						System.out.println(link.getContent().substring(0, Math.min(500, link.getContent().length())));
-					}
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	            // Printing out the results
+	            System.out.println("URL: " + webPage.getUrl());
+	            System.out.println("Title: " + result.getTitle());
+//	            System.out.println("Site Name: " + result.getSiteName());
+//	            System.out.println("First 500 characters: " + textContent.substring(0, Math.min(500, textContent.length()))); // First 500 characters
+	            for (Keyword keyword : keywords) {
+	                System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+	            }
+
+	            System.out.println("Total Score: " + totalScore);
+
+	            // Fetch links that contain the keyword in the title
+	            int[] totalLinksChecked = {0}; // Tracks the number of links checked
+	            ArrayList<WebPage> linksWithTitleContainingKeyword = fetchLinksWithTitleContainingKeyword(url, searchKeyword, totalLinksChecked);
+	            System.out.println("Total links checked: " + totalLinksChecked[0]);
+	            System.out.println("Links containing the search keyword:");
+	            if (linksWithTitleContainingKeyword.isEmpty()) {
+	                System.out.println("No valid links found.");
+	            } else {
+	                for (WebPage link : linksWithTitleContainingKeyword) {
+	                    System.out.println(link.getUrl());
+
+	                    // For each link, fetch its content and perform keyword extraction
+	                    try {
+	                        String linkContent = fetchContentFromUrl(link.getUrl());
+	                        if (linkContent == null || linkContent.isEmpty()) {
+	                            System.out.println("No content found for the link: " + link.getUrl());
+	                            continue;
+	                        }
+
+	                        String linkTextContent = extractText(linkContent);
+	                        ArrayList<Keyword> linkKeywords = Keyword.getDefaultKeywords();
+	                        WordCounter.calculateKeywordCounts(linkTextContent, linkKeywords);
+
+	                        // Calculate total score for the link content
+	                        int linkTotalScore = calculateTotalScore(linkKeywords);
+
+	                        // Printing the results for the link
+	                        for (Keyword keyword : linkKeywords) {
+	                            System.out.println("Link Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+	                        }
+
+	                        System.out.println("Link Total Score: " + linkTotalScore);
+
+	                    } catch (IOException e) {
+	                        System.out.println("Error processing link: " + link.getUrl());
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+	        }
+	    } catch (Exception e) {
+	        System.out.println("Error processing the search results: " + e.getMessage());
+	        e.printStackTrace();
+	    }
 	}
+
 	public static void main(String[] args) {
 		try {
 			String searchKeyword = "二戰";
 			GoogleQuery googleQuery = new GoogleQuery(searchKeyword);
 			ArrayList<SearchResult> results = googleQuery.query();
-			
+
 			WebPageProcessor processor = new WebPageProcessor();
 			for (SearchResult result : results) {
 				// 調用 SearchResult 中儲存的網址
 				String url = result.getUrl();
 				String content = processor.fetchContentFromUrl(url);
 				WebPage webPage = new WebPage(result.getUrl(), content);
-				
+
 				// 提取純文本內容
 				String textContent = processor.extractText(content);
-				
+
 				// 設置關鍵字
 				ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
-				
+
 				// 計算關鍵字出現次數
 				WordCounter.calculateKeywordCounts(textContent, keywords);
-				
+
 				// 計算總分
 				int totalScore = processor.calculateTotalScore(keywords);
-				
+
 				// 打印結果
 				System.out.println("網址: " + webPage.getUrl());
 				System.out.println("標題: " + result.getTitle());
@@ -191,9 +223,9 @@ public class WebPageProcessor {
 				for (Keyword keyword : keywords) {
 					System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
 				}
-				
+
 				System.out.println("總分: " + totalScore);
-				
+
 				// 抓取主頁中所有 title 或文本包含搜索關鍵字的子連結
 				int[] totalLinksChecked = { 0 }; // 用於計算總共檢查的連結數量
 				ArrayList<WebPage> linksWithTitleContainingKeyword = processor.fetchLinksWithTitleContainingKeyword(url,
@@ -206,7 +238,7 @@ public class WebPageProcessor {
 					for (WebPage link : linksWithTitleContainingKeyword) {
 						System.out.println(link.getUrl());
 						System.out.println(link.getContent().substring(0, Math.min(500, link.getContent().length())));
-						
+
 					}
 				}
 			}
