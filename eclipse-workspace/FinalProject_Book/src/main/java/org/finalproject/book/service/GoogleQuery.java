@@ -89,7 +89,7 @@ public class GoogleQuery {
 				citeUrl = URLDecoder.decode(citeUrl, "UTF-8");// 原本的url不能訪問，要先解碼
 				citeUrl = removeQueryParams(citeUrl);
 				
-				SearchResult result = new SearchResult(title, citeUrl, siteName);
+				SearchResult result = new SearchResult(title, citeUrl);
 				results.add(result);
 				
 

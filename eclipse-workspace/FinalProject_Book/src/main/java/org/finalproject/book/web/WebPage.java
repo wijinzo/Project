@@ -1,46 +1,50 @@
 package org.finalproject.book.web;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.finalproject.book.Keyword.Keyword;
 import org.finalproject.book.Keyword.WordCounter;
 
-public class WebPage{
+public class WebPage {
 	private String url;
-	private String name;
 	private WordCounter counter;
 	private double score;
 	private String content;
-	
-	public WebPage(String url,String content){
+
+	public WebPage(String url, String content) {
 		this.url = url;
 		this.content = content;
-		this.counter = new WordCounter(url,content);
-		
-		
+		this.counter = new WordCounter(url, content);
+
 	}
 //	public WebPage(String url, String name){
 //		this.url = url;
 //		this.name = name;
 //		this.counter = new WordCounter(url);
 //	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public String getContent() {
+		return content;
+	}
 	
-	 public String getUrl() {
-	        return url;
-	    }
+	public double getScore() {
+		return score;
+	}
 
-    public String getContent() {
-        return content;
-    }
-
-	public void setScore(ArrayList<Keyword> keywords) throws IOException{
+	public void setScore(ArrayList<Keyword> keywords) throws IOException {
 		score = 0;
 		// YOUR TURN
 		// 1. calculate the score of this webPage
-		for(Keyword keyword:keywords ) {
+		for (Keyword keyword : keywords) {
 			counter.countKeyword(keyword);
-			score += keyword.getCount()*keyword.getWeight();		}
+			score += keyword.getCount() * keyword.getWeight();
+		}
 
 	}
-	
+
 }

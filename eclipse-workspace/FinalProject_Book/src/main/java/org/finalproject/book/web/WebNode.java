@@ -26,10 +26,10 @@ public class WebNode
 		// 		2.set this score to initialize nodeScore
 		//		3.nodeScore must be the score of this webPage plus all children's nodeScore
 		webPage.setScore(keywords);
-		nodeScore += webPage.score ;
+		nodeScore += webPage.getScore() ;
 		for(WebNode child:children) {
 			child.webPage.setScore(keywords);
-			nodeScore += child.webPage.score;
+			nodeScore += child.webPage.getScore();
 		}
 		
 		
