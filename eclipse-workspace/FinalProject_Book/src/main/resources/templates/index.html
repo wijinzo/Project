@@ -3,18 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google 搜尋</title>
-    <!-- 使用 Thymeleaf 來正確引入靜態資源 -->
-    <link rel="stylesheet" th:href="@{/style.css}">
+    <title>Google 圖書搜尋</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="search-container">
-        <h1>Google 搜尋</h1>
-        <form action="/search" method="post">
-            <input type="text" name="keyword" placeholder="輸入關鍵字...">
-            <br>
-            <button type="submit">搜尋</button>
+    <div class="container">
+        <h1>Google 圖書搜尋</h1>
+        <div class="ornament"></div>
+        <p>搜尋數千本書籍，找到您的下一本好書。</p>
+        <form class="search-box" action="/search" method="post">
+            <input type="text" name="keyword" placeholder="輸入書名、作者或類別...">
+            <button type="submit">&#128269;</button>
         </form>
+        <div class="bookshelf">
+            <div class="book">
+                <div class="book-title">小說</div>
+            </div>
+            <div class="book">
+                <div class="book-title">詩詞</div>
+            </div>
+            <div class="book">
+                <div class="book-title">歷史</div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
