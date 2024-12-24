@@ -111,17 +111,20 @@ public class WebPageProcessor {
 			try {
 				// 過濾掉 JavaScript 和空連結
 				if (!linkHref.startsWith("javascript:") && !linkHref.isEmpty()) {
+					// 跳過包含 "readmoo" 的連結
+					if (linkHref.contains("readmoo")) {
+						continue; // 直接跳過這個連結
+					}
+
 					// 檢查連結的 title 或 text 是否包含關鍵字
 					if ((linkTitle != null && linkTitle.contains(searchKeyword)) || linkText.contains(searchKeyword)) {
 						String subContent = fetchContentFromUrl(linkHref); // 抓取子頁內容
 						links.add(new WebPage(linkHref, subContent)); // 創建 WebPage 並添加到結果列表
-						// if (links.size() >= 3) {
-						// break; // 當抓取到三個子連結後停止
-						// }
+
 					}
 				}
 			} catch (Exception e) {
-				// System.out.println("無法處理連結: " + linkHref);
+				// 這裡可以記錄或處理特定的錯誤
 				continue; // 跳過異常連結並處理剩餘部分
 			}
 		}
@@ -153,17 +156,11 @@ public class WebPageProcessor {
 					// Defining default keywords
 					ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
 
-					// Counting the occurrences of the keywords
-//				WordCounter.calculateKeywordCounts(textContent, keywords);
-
-					// Calculating total score based on the keywords found
-//				int totalScore = calculateTotalScore(keywords);
 					tree.root.setNodeScore(keywords);
 //				 Printing out the results
 					System.out.println("URL: " + rootPage.getUrl());
 					System.out.println("Title: " + result.getTitle());
-//				System.out.println("Site Name: " + result.getSiteName());
-//				System.out.println(
+
 
 					for (Keyword keyword : keywords) {
 						System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
@@ -208,6 +205,83 @@ public class WebPageProcessor {
 								System.out.println(
 										"Link Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
 							}
+							validLinkCount++; // 增加有效連結計數器
+							if (validLinkCount >= 3) {
+								break; // 當抓取到三個有效子連結後停止
+							}
+
+						}
+					}
+					result.setTree(tree);
+					System.out.println("Total Score: " + tree.root.nodeScore);
+					System.out.println("-------------------------------------------------");
+				}
+			}
+
+		} catch (Exception e) {
+			System.out.println("Error processing the search results: " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+		sortTree(results);
+		return results;
+	}
+	
+	public ArrayList<SearchResult> fastSetScore(String searchKeyword, ArrayList<SearchResult> results) {
+		ArrayList<WebTree> sort = new ArrayList<WebTree>();
+		try {
+			for (SearchResult result : results) {
+				// Retrieving the URL from the SearchResult
+				String url = result.getUrl();
+				String content = fetchContentFromUrl(url);
+
+				if (content != null || !content.isEmpty()) {
+
+					String textContent = extractText(content);
+					// System.out.println("textContent"+textContent);
+					WebPage rootPage = new WebPage(result.getUrl(), textContent);
+					WebTree tree = new WebTree(rootPage);
+
+					// Defining default keywords
+					ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
+
+					tree.root.setNodeScore(keywords);
+//				 Printing out the results
+
+
+
+					// Fetch links that contain the keyword in the title
+					int[] totalLinksChecked = { 0 }; // Tracks the number of links checked
+					ArrayList<WebPage> subWebPages = fetchLinksWithTitleContainingKeyword(url, searchKeyword,
+							totalLinksChecked);
+					if (subWebPages.isEmpty()) {
+						System.out.println(url + " no valid links found.");
+					} else {
+						int validLinkCount = 0; // 有效連結計數器
+						for (WebPage childPage : subWebPages) {
+
+							WebNode childNode = new WebNode(childPage);
+							String link = childPage.getUrl();
+							tree.addChild(childNode);
+							// For each link, fetch its content and perform keyword extraction
+							String childContent = childPage.getContent();
+
+							try {
+								childContent = fetchContentFromUrl(link);
+							} catch (Exception e) {
+								System.out.println("無法處理連結: " + link);
+								continue;
+							}
+							if (childContent == null || childContent.isEmpty()) {
+								System.out.println("No content found for the link: " + link);
+								continue;
+							}
+
+							String linkTextContent = extractText(childContent);
+							tree.setPostOrderScore(keywords);
+
+							// Printing the results for the link
+
 							validLinkCount++; // 增加有效連結計數器
 							if (validLinkCount >= 3) {
 								break; // 當抓取到三個有效子連結後停止
