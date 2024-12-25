@@ -6,11 +6,13 @@ public class SearchResult {
 	private String title;
 	private String url;
 	private String siteName;
+    private String description;
 	private WebTree tree = null;
 
-	public SearchResult(String title, String url) {
+	public SearchResult(String title, String url, String description) {
 		this.title = title;
 		this.url = url;
+        this.description = description;
 	}
 
 	public String getTitle() {
@@ -44,10 +46,17 @@ public class SearchResult {
 	public void setSiteName(String siteName) {
 		this.siteName = siteName;
 	}
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
 	@Override
 	public String toString() {
-		return "SearchResult{" + "title='" + title + '\'' + ", url='" + url + '\'' + ", siteName='" + siteName + '\''
+		return "SearchResult{" + "title='" + title + '\'' + ", url='" + url + '\'' + ", siteName='" + siteName + '\'' + ", description='" + description + '\''
 				+ '}';
 	}
 }

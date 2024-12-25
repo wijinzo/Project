@@ -31,7 +31,7 @@ public class GoogleQuery {
 			// Also, consider why the results might be incorrect
 			// when entering Chinese keywords.
 			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
-			String mainKeyword = " 書";
+			String mainKeyword = " 書籍";
 			String encodeMainKeyword = java.net.URLEncoder.encode(mainKeyword, "utf-8");
 
 //			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
@@ -79,6 +79,9 @@ public class GoogleQuery {
 			try {
 				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
 				String title = li.select("a").get(0).select(".vvjwJb").text();
+
+				Element parentLis = li.parent().select(".kCrYT").get(1);
+				String description = parentLis.select(".BNeawe").text(); // 抓取描述
 				String siteName = li.select("cite").text();
 
 
@@ -89,7 +92,7 @@ public class GoogleQuery {
 				citeUrl = URLDecoder.decode(citeUrl, "UTF-8");// 原本的url不能訪問，要先解碼
 				citeUrl = removeQueryParams(citeUrl);
 				
-				SearchResult result = new SearchResult(title, citeUrl);
+				SearchResult result = new SearchResult(title, citeUrl, description);
 				results.add(result);
 				
 
@@ -108,17 +111,6 @@ public class GoogleQuery {
 		}
 
 		return queryStartIndex != -1 ? url.substring(0, queryStartIndex) : url;
-	}
+	}	
 	
-	public static void main(String[] args) {
-		try {
-			GoogleQuery googleQuery = new GoogleQuery("二戰");
-			ArrayList<SearchResult> results = googleQuery.query();
-			for (SearchResult result : results) {
-				System.out.println(result);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }

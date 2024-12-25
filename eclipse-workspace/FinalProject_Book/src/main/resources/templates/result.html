@@ -11,13 +11,16 @@
             background: #f4f4f9;
             color: #333;
         }
-        h1 {
-            color: #009688;
+        .page-title {
+            color: #7A848D;
+            text-align: center;
+            
         }
         .results {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            align-items: center; /* 居中顯示 */
         }
         .result-item {
             background: #ffffff;
@@ -25,14 +28,22 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 15px;
             animation: slideIn 0.5s ease;
+            max-width: 800px; /* 設置最大寬度 */
+            width: 100%; /* 設置寬度為100% */
         }
         .result-item a {
-            color: #4CAF50;
+            color: #A9B7AA;
             text-decoration: none;
             font-weight: bold;
+            font-size: 1.5em; /* 增加 Title 字體大小 */
         }
         .result-item a:hover {
             text-decoration: underline;
+        }
+        .result-summary {
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.8em; /* 保持 Description 字體大小 */
         }
         @keyframes slideIn {
             from { transform: translateY(20px); opacity: 0; }
@@ -41,12 +52,13 @@
     </style>
 </head>
 <body>
-    <h1>搜尋結果</h1>
+    <h1 class ="page-title">搜尋結果</h1>
     <div class="results">
         <!-- 替換為動態內容 -->
         <div th:each="result : ${results}">
             <div class="result-item">
                 <a th:href="${result.url}" th:text="${result.title}"></a>
+                <div class="result-summary" th:text="${result.description}"></div> <!-- 顯示描述 -->
             </div>
         </div>
         <!-- 若沒有結果，顯示訊息 -->

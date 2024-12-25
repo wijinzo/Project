@@ -143,6 +143,7 @@ public class WebPageProcessor {
 			for (SearchResult result : results) {
 				// Retrieving the URL from the SearchResult
 				String url = result.getUrl();
+                ///String description = result.getDescription();
 				String content = fetchContentFromUrl(url);
 
 				if (content != null || !content.isEmpty()) {
@@ -160,6 +161,7 @@ public class WebPageProcessor {
 //				 Printing out the results
 					System.out.println("URL: " + rootPage.getUrl());
 					System.out.println("Title: " + result.getTitle());
+                    System.out.println("Description: " + result.getDescription());
 
 
 					for (Keyword keyword : keywords) {
