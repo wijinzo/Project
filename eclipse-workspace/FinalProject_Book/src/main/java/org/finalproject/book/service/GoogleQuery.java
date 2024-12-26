@@ -25,20 +25,13 @@ public class GoogleQuery {
 	public GoogleQuery(String searchKeyword) {
 		this.searchKeyword = searchKeyword;
 		try {
-			// This part has been specially handled for Chinese keyword processing.
-			// You can comment out the following two lines
-			// and use the line of code in the lower section.
-			// Also, consider why the results might be incorrect
-			// when entering Chinese keywords.
-			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
+			
+			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");//轉換成網址格式
 			String mainKeyword = " 書籍";
 			String encodeMainKeyword = java.net.URLEncoder.encode(mainKeyword, "utf-8");
 
-//			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
 			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=10";
 			
-			// this.url =
-			// "https://www.google.com/search?q="+searchKeyword+"&oe=utf8&num=20";
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -104,7 +97,7 @@ public class GoogleQuery {
 		return results;
 	}
 
-	public static String removeQueryParams(String url) {
+	public static String removeQueryParams(String url) { //刪除不必要查詢參數
 		int queryStartIndex = url.indexOf('&');
 		if (queryStartIndex == -1) {
 			queryStartIndex = url.indexOf('?');

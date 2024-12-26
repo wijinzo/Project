@@ -5,66 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>搜尋結果</title>
     <style>
+        :root {
+            --primary-color: #8B7355;
+            --secondary-color: #D4C1A6;
+            --background-color: #F5F1EA;
+            --text-color: #4A4A4A;
+            --accent-color: #A67B5B;
+            --tap-color: #4A90E2;
+            --shadow: 0 4px 15px rgba(139, 115, 85, 0.15);
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Noto Serif TC', serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
             padding: 20px;
-            background: #f4f4f9;
-            color: #333;
+            min-height: 100vh;
+            line-height: 1.8;
         }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
         .page-title {
-            color: #7A848D;
+            color: var(--primary-color);
             text-align: center;
-            
-        }
-        .results {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center; /* 居中顯示 */
-        }
-        .result-item {
-            background: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            animation: slideIn 0.5s ease;
-            max-width: 800px; /* 設置最大寬度 */
-            width: 100%; /* 設置寬度為100% */
-        }
-        .result-item a {
-            color: #A9B7AA;
-            text-decoration: none;
+            font-size: 2.2em;
+            margin-bottom: 50px;
             font-weight: bold;
-            font-size: 1.5em; /* 增加 Title 字體大小 */
+            letter-spacing: 0.2em;
+            border-bottom: 1px solid var(--accent-color);
+            padding-bottom: 20px;
         }
+
+        .results {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 3px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(166, 123, 91, 0.1);
+        }
+
+        .result-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 115, 85, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .result-item a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: 400;
+            display: block;
+            margin-bottom: 15px;
+            transition: color 0.3s ease;
+        }
+
         .result-item a:hover {
-            text-decoration: underline;
+            color: var(--tap-color );
+            font-weight: bold;
         }
+
         .result-summary {
-            margin-top: 10px;
             color: #666;
-            font-size: 0.8em; /* 保持 Description 字體大小 */
+            line-height: 1.8;
+            font-size: 0.95em;
+            font-weight: 300;
         }
-        @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+
+        .navigation {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .back-button {
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 12px 35px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            letter-spacing: 0.1em;
+            font-family: inherit;
+        }
+
+        .back-button:hover {
+            background: var(--primary-color);
+            color: var(--background-color);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            .page-title {
+                font-size: 1.8em;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: calc(var(--animation-order) * 0.1s);
+            opacity: 0;
         }
     </style>
 </head>
 <body>
-    <h1 class ="page-title">搜尋結果</h1>
-    <div class="results">
-        <!-- 替換為動態內容 -->
-        <div th:each="result : ${results}">
-            <div class="result-item">
-                <a th:href="${result.url}" th:text="${result.title}"></a>
-                <div class="result-summary" th:text="${result.description}"></div> <!-- 顯示描述 -->
+    <div class="container">
+        <h1 class="page-title">搜尋結果</h1>
+        
+        <div class="results">
+            <div th:each="result, iterStat : ${results}">
+                <div class="result-item" th:style="'--animation-order: ' + ${iterStat.index}">
+                    <a th:href="${result.url}" th:text="${result.title}"></a>
+                    <div class="result-summary" th:text="${result.description}"></div>
+                </div>
+            </div>
+            
+            <div th:if="${results == null || results.isEmpty()}" class="no-results">
+                <p>暫時未找到相關內容，請嘗試其他關鍵字。</p>
             </div>
         </div>
-        <!-- 若沒有結果，顯示訊息 -->
-        <div th:if="${results == null || results.isEmpty()}" class="result-item">
-            <p>未找到結果，請嘗試其他關鍵字。</p>
+
+        <div class="navigation">
+            <button class="back-button" onclick="goBack()">返回首頁</button>
         </div>
     </div>
+
+    <script>
+        function goBack() {
+            window.location.href = '/';
+        }
+    </script>
 </body>
 </html>

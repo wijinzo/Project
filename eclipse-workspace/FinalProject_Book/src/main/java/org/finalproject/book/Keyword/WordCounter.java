@@ -18,45 +18,6 @@ public class WordCounter {
 		this.content = content;
 	}
 
-//	private String fetchContent() throws IOException {
-//		URL url = new URL(this.urlStr);
-//		URLConnection conn = url.openConnection();
-//		InputStream in = conn.getInputStream();
-//		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-//
-//		String retVal = "";
-//
-//		String line = null;
-//
-//		while ((line = br.readLine()) != null) {
-//			retVal = retVal + line + "\n";
-//		}
-//
-//		return retVal;
-//	}
-
-//	public void countKeyword(Keyword keyword) throws IOException {
-////		if (content == null) {
-////			content = fetchContent();
-////		}
-//
-//		// To do a case-insensitive search, we turn the whole content and keyword into
-//		// upper-case:
-//		content = content.toUpperCase();
-//		String searchKeyword = keyword.getWord().toUpperCase();
-//
-//		int fromIdx = 0;
-//		int found = -1;
-//
-//		while ((found = content.indexOf(searchKeyword, fromIdx)) != -1) {
-//			//keyword.addCount();
-//			fromIdx = found + searchKeyword.length();
-//		}
-//	    System.out.println("Keyword: " + keyword.getWord() + " found " + keyword.getCount() + " times");
-//
-//
-//	}
-
 	// 計算單個關鍵字出現次數
     public static int countKeywordOccurrences(String content, String keyword) {
         int count = 0;
