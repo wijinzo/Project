@@ -48,7 +48,6 @@ public class WebPageProcessor {
 
 			int statusCode = conn.getResponseCode();
 
-			// 根據狀態碼處理
 			if (statusCode == HttpURLConnection.HTTP_FORBIDDEN) {
 				System.out.println("無法處理連結: " + url + " (403 Forbidden)，將跳過此 URL");
 				return ""; // 返回空字符串，跳過此 URL
@@ -70,13 +69,11 @@ public class WebPageProcessor {
 				}
 
 			} catch (Exception e) {
-				// 捕捉並忽略所有錯誤
 				System.out.println("錯誤處理 URL: " + url + " 錯誤: " + e.getMessage());
 				return ""; // 返回空字符串，跳過所有異常的 URL
 			}
 
 		} catch (Exception e) {
-			// 捕捉所有錯誤，無論是連接錯誤或其他
 			System.out.println("無法連接 URL: " + url + " 錯誤: " + e.getMessage());
 			return ""; // 返回空字符串，跳過異常 URL
 		} finally {
@@ -112,9 +109,9 @@ public class WebPageProcessor {
 				// 過濾掉 JavaScript 和空連結
 				if (!linkHref.startsWith("javascript:") && !linkHref.isEmpty()) {
 					// 跳過包含 "readmoo" 的連結
-					if (linkHref.contains("readmoo")) {
-						continue; // 直接跳過這個連結
-					}
+//					if (linkHref.contains("readmoo")) {
+//						continue; // 直接跳過這個連結，
+//					}
 
 					// 檢查連結的 title 或 text 是否包含關鍵字
 					if ((linkTitle != null && linkTitle.contains(searchKeyword)) || linkText.contains(searchKeyword)) {
@@ -124,7 +121,6 @@ public class WebPageProcessor {
 					}
 				}
 			} catch (Exception e) {
-				// 這裡可以記錄或處理特定的錯誤
 				continue; // 跳過異常連結並處理剩餘部分
 			}
 		}

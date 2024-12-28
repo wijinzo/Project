@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.List;
 import java.net.URLDecoder;
-
 
 import org.finalproject.book.web.WebPage;
 import org.jsoup.Jsoup;
@@ -21,17 +21,19 @@ public class GoogleQuery {
 	public String url;
 	public String content;
 	public WebPage page;
+	public ArrayList<SearchResult> results;
 
 	public GoogleQuery(String searchKeyword) {
 		this.searchKeyword = searchKeyword;
+		this.results = new ArrayList<>();
 		try {
-			
-			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");//轉換成網址格式
-			String mainKeyword = " 書籍";
+
+			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
+			String mainKeyword = " 網路書店";
 			String encodeMainKeyword = java.net.URLEncoder.encode(mainKeyword, "utf-8");
 
-			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=10";
-			
+			this.url = "https://www.google.com/search?q=" + encodeKeyword + "+" + encodeMainKeyword + "&oe=utf8&num=20";
+
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -56,11 +58,11 @@ public class GoogleQuery {
 	}
 
 	public ArrayList<SearchResult> query() throws IOException {
-        if (content == null) {
-            content = fetchContent();
-        }
+		if (content == null) {
+			content = fetchContent();
+		}
 
-        ArrayList<SearchResult> results = new ArrayList<>();
+		ArrayList<SearchResult> results = new ArrayList<>();
 
 		// using Jsoup analyze html string
 		Document doc = Jsoup.parse(content);
@@ -68,6 +70,9 @@ public class GoogleQuery {
 		Elements lis = doc.select("div");
 		lis = lis.select(".kCrYT");
 
+		List<String> allowedDomains = List.of("bookrep.com.tw", "taaze.tw", "eslite.com", "sanmin.com.tw",
+				"store.showwe.tw", "cite.com.tw", "ithome.com.tw", "shop.cwbook.com.tw", "cavesbooks.com.tw",
+				"readmoo.com", "books.cw.com.tw", "momoshop.com.tw"); // 允許的域名
 		for (Element li : lis) {
 			try {
 				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
@@ -77,33 +82,37 @@ public class GoogleQuery {
 				String description = parentLis.select(".BNeawe").text(); // 抓取描述
 				String siteName = li.select("cite").text();
 
-
 				if (title.equals("")) {
 					continue;
 				}
-				
+
 				citeUrl = URLDecoder.decode(citeUrl, "UTF-8");// 原本的url不能訪問，要先解碼
 				citeUrl = removeQueryParams(citeUrl);
-				
+
+				// 過濾不符合條件的網站
+				boolean isAllowed = allowedDomains.stream().anyMatch(citeUrl::contains);
+				if (!isAllowed) {
+					continue;
+				}
+
 				SearchResult result = new SearchResult(title, citeUrl, description);
 				results.add(result);
-				
 
 			} catch (IndexOutOfBoundsException e) {
-//				e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
 
 		return results;
 	}
 
-	public static String removeQueryParams(String url) { //刪除不必要查詢參數
+	public static String removeQueryParams(String url) {
 		int queryStartIndex = url.indexOf('&');
 		if (queryStartIndex == -1) {
 			queryStartIndex = url.indexOf('?');
 		}
 
 		return queryStartIndex != -1 ? url.substring(0, queryStartIndex) : url;
-	}	
-	
+	}
+
 }
