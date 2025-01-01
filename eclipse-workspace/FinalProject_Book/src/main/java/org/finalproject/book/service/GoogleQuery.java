@@ -71,7 +71,7 @@ public class GoogleQuery {
 		lis = lis.select(".kCrYT");
 
 		List<String> allowedDomains = List.of("bookrep.com.tw", "taaze.tw", "eslite.com", "sanmin.com.tw",
-				"store.showwe.tw", "cite.com.tw", "ithome.com.tw", "shop.cwbook.com.tw", "cavesbooks.com.tw",
+				"store.showwe.tw", "cite.com.tw", "shop.cwbook.com.tw", "cavesbooks.com.tw",
 				"readmoo.com", "books.cw.com.tw", "momoshop.com.tw"); // 允許的域名
 		for (Element li : lis) {
 			try {

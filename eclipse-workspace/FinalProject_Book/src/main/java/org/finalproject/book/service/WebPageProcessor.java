@@ -12,7 +12,6 @@ import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class WebPageProcessor {
+	private ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
 
 	public WebPageProcessor() {
 
@@ -47,7 +47,7 @@ public class WebPageProcessor {
 			conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
 
 			int statusCode = conn.getResponseCode();
-
+			
 			if (statusCode == HttpURLConnection.HTTP_FORBIDDEN) {
 				System.out.println("無法處理連結: " + url + " (403 Forbidden)，將跳過此 URL");
 				return ""; // 返回空字符串，跳過此 URL
@@ -91,8 +91,9 @@ public class WebPageProcessor {
 		return doc.text();
 	}
 
-	public ArrayList<WebPage> fetchLinksWithTitleContainingKeyword(String url, String searchKeyword,
-			int[] totalLinksChecked) throws Exception {
+	// get child link from title and text contain SearchKeyword
+	public ArrayList<WebPage> fetchChildLinks(String url, String searchKeyword, int[] totalLinksChecked)
+			throws Exception {
 		ArrayList<WebPage> links = new ArrayList<>();
 		String content = fetchContentFromUrl(url); // 抓取主頁內容
 		Document doc = Jsoup.parse(content);
@@ -107,12 +108,8 @@ public class WebPageProcessor {
 
 			try {
 				// 過濾掉 JavaScript 和空連結
-				if (!linkHref.startsWith("javascript:") && !linkHref.isEmpty()) {
-					// 跳過包含 "readmoo" 的連結
-//					if (linkHref.contains("readmoo")) {
-//						continue; // 直接跳過這個連結，
-//					}
-
+				if (!linkHref.startsWith("javascript:") && !linkHref.isEmpty()&&!(linkHref.toLowerCase().endsWith(".jpg")||linkHref.toLowerCase().endsWith(".png"))) {
+					
 					// 檢查連結的 title 或 text 是否包含關鍵字
 					if ((linkTitle != null && linkTitle.contains(searchKeyword)) || linkText.contains(searchKeyword)) {
 						String subContent = fetchContentFromUrl(linkHref); // 抓取子頁內容
@@ -132,33 +129,78 @@ public class WebPageProcessor {
 		results.sort((result1, result2) -> Double.compare(result2.getTree().root.nodeScore,
 				result1.getTree().root.nodeScore));
 	}
+	
+	public void setChildsPageRecursive(ArrayList<WebPage> childPages, WebTree tree, String searchKeyword, int[] totalLinksChecked, int currentDepth) throws Exception {
+	    if (childPages.isEmpty() || currentDepth > 2) { // 遞迴到達最大深度或無子頁連結
+	        System.out.println("no valid links found or maxDepth");
+	    	return;
+	    }
+
+	    int validLinkCount = 0; // 記錄有效連結數量
+
+	    for (WebPage childPage : childPages) {
+	        if (validLinkCount >= 3) { // 每層最多處理 3 個有效連結
+	            break;
+	        }
+
+	        String link = childPage.getUrl();
+	        System.out.println("Processing link (Depth " + currentDepth + "): " + link);
+
+	        String childContent;
+	        try {
+	            childContent = fetchContentFromUrl(link); // 抓取子連結的內容
+	        } catch (Exception e) {
+	            System.out.println("無法處理連結: " + link);
+	            continue; // 跳過無效連結
+	        }
+
+	        if (childContent == null || childContent.isEmpty()) {
+	            System.out.println("No content found for the link: " + link);
+	            continue; // 跳過空內容
+	        }
+
+	        // 為有效子連結創建 WebNode，並添加到樹中
+	        WebNode childNode = new WebNode(childPage);
+	        tree.addChild(childNode);
+
+	        // 設置關鍵字分數
+	        tree.setPostOrderScore(keywords);
+
+	        // 顯示關鍵字統計資訊
+	        for (Keyword keyword : keywords) {
+	            System.out.println("LinkKeyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
+	        }
+
+	        validLinkCount++;
+
+	        // 遞迴處理下一層連結
+	        ArrayList<WebPage> grandChildPages = fetchChildLinks(link, searchKeyword, totalLinksChecked);
+	        setChildsPageRecursive(grandChildPages, tree, searchKeyword, totalLinksChecked, currentDepth + 1); // 遞迴下一層
+	    }
+	}
 
 	public ArrayList<SearchResult> setScore(String searchKeyword, ArrayList<SearchResult> results) {
-		ArrayList<WebTree> sort = new ArrayList<WebTree>();
 		try {
 			for (SearchResult result : results) {
 				// Retrieving the URL from the SearchResult
 				String url = result.getUrl();
-                ///String description = result.getDescription();
 				String content = fetchContentFromUrl(url);
 
-				if (content != null || !content.isEmpty()) {
-					System.out.println("Failed to fetch content or content is empty from: " + url);
+				if (content != null) {
 
 					String textContent = extractText(content);
-					// System.out.println("textContent"+textContent);
+					// System.out.println("textContent: "+textContent);
 					WebPage rootPage = new WebPage(result.getUrl(), textContent);
 					WebTree tree = new WebTree(rootPage);
 
 					// Defining default keywords
-					ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
+//					ArrayList<Keyword> keywords = Keyword.getDefaultKeywords();
 
 					tree.root.setNodeScore(keywords);
 //				 Printing out the results
 					System.out.println("URL: " + rootPage.getUrl());
 					System.out.println("Title: " + result.getTitle());
-                    System.out.println("Description: " + result.getDescription());
-
+					System.out.println("Description: " + result.getDescription());
 
 					for (Keyword keyword : keywords) {
 						System.out.println("Keyword: " + keyword.getWord() + ", Count: " + keyword.getCount());
@@ -166,15 +208,15 @@ public class WebPageProcessor {
 
 					// Fetch links that contain the keyword in the title
 					int[] totalLinksChecked = { 0 }; // Tracks the number of links checked
-					ArrayList<WebPage> subWebPages = fetchLinksWithTitleContainingKeyword(url, searchKeyword,
-							totalLinksChecked);
+					ArrayList<WebPage> childPages = fetchChildLinks(url, searchKeyword, totalLinksChecked);
 					System.out.println("Total links checked: " + totalLinksChecked[0]);
 					System.out.println("Links containing the search keyword:");
-					if (subWebPages.isEmpty()) {
+					/*
+					if (childPages.isEmpty()) {
 						System.out.println(url + " no valid links found.");
 					} else {
 						int validLinkCount = 0; // 有效連結計數器
-						for (WebPage childPage : subWebPages) {
+						for (WebPage childPage : childPages) {
 
 							WebNode childNode = new WebNode(childPage);
 							String link = childPage.getUrl();
@@ -210,6 +252,10 @@ public class WebPageProcessor {
 
 						}
 					}
+					*/
+//					setChildsPage(childPages, tree, url, searchKeyword, totalLinksChecked);
+					setChildsPageRecursive(childPages, tree, searchKeyword, totalLinksChecked, 1);
+
 					result.setTree(tree);
 					System.out.println("Total Score: " + tree.root.nodeScore);
 					System.out.println("-------------------------------------------------");
@@ -224,7 +270,5 @@ public class WebPageProcessor {
 		sortTree(results);
 		return results;
 	}
-	
-	
 
 }
