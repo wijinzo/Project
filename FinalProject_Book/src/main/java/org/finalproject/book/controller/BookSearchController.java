@@ -26,7 +26,7 @@ public class BookSearchController {
 
     @PostMapping("/search")
     public String search(@RequestParam("keyword") String keyword, Model model) {
-        ArrayList<SearchResult> results = new ArrayList<>();  // 初始化以避免空指針錯誤
+        ArrayList<SearchResult> results = new ArrayList<>();  
         try {
             GoogleQuery googleQueryService = new GoogleQuery(keyword);
             WebPageProcessor webPageProcessor = new WebPageProcessor();
