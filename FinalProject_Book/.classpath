@@ -39,5 +39,32 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/K/Documents/程設/jsoup-1.18.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/K/.m2/repository/org/springframework/boot/spring-boot/3.3.4/spring-boot-3.3.4.jar" sourcepath="C:/Users/K/.m2/repository/org/springframework/boot/spring-boot/3.3.4/spring-boot-3.3.4-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.springframework.boot"/>
+			<attribute name="maven.artifactId" value="spring-boot"/>
+			<attribute name="maven.version" value="3.3.4"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/K/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.3.4/spring-boot-autoconfigure-3.3.4.jar" sourcepath="C:/Users/K/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.3.4/spring-boot-autoconfigure-3.3.4-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.springframework.boot"/>
+			<attribute name="maven.artifactId" value="spring-boot-autoconfigure"/>
+			<attribute name="maven.version" value="3.3.4"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/K/.m2/repository/org/apache/logging/log4j/log4j-api/2.23.1/log4j-api-2.23.1.jar" sourcepath="C:/Users/K/.m2/repository/org/apache/logging/log4j/log4j-api/2.23.1/log4j-api-2.23.1-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.apache.logging.log4j"/>
+			<attribute name="maven.artifactId" value="log4j-api"/>
+			<attribute name="maven.version" value="2.23.1"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
